@@ -125,8 +125,8 @@ class Agent:
                     pass
             computed_nodes.append(next)
         #print(np.array([self._NodeGenes[self.percept_size+o].value for o in range(self.out_size)]))
-        #out = np.argmax(np.array([self._NodeGenes[self.percept_size+o] for o in range(self.out_size)]))
-        out =  np.array([self._NodeGenes[self.percept_size+o] for o in range(self.out_size)])
+        out = np.argmax(np.array([self._NodeGenes[self.percept_size+o] for o in range(self.out_size)]))
+        #out =  np.array([self._NodeGenes[self.percept_size+o] for o in range(self.out_size)])
         for n in self._ConnectGenes:
             self._ConnectGenes[n].set_computed(False)
         for n in (self._NodeGenes):
@@ -501,11 +501,11 @@ if __name__=="__main__":
     import gym
     import time
     import cv2
-    env = gym.make("BipedalWalker-v3")
+    env = gym.make("CartPole-v1")
     observation = env.reset()
     #Percept size and action size.    
     percept_size = len(observation.flatten())
-    action_size = 4 #2 For cartpole , 4 for bipedal walker
+    action_size = 2 #2 For cartpole , 4 for bipedal walker
     GlobalVar.ggt = GlobalGeneTable(percept_size,action_size)
     
     NUM_GAMES = 10000
@@ -517,59 +517,22 @@ if __name__=="__main__":
     SOLVED = False
     for _ in range(NUM_GAMES):
         all_reward = 0
-        best = -200
-        best_agent = None
         for n,agent in tqdm(enumerate(population.get_population())):
             cum_reward = 0
-            neg_count = 0
             while(True):
                 #print(env.action_space.sample())
                 #observation = cv2.resize(cv2.cvtColor(observation[30:200,:,:], cv2.COLOR_BGR2GRAY),(16,16)).flatten()/255
                 action = agent.forward(observation.flatten()) # your agent here (this takes random actions)
                 observation, reward, done, _ = env.step(action)
                 cum_reward += reward
-                if(reward<0):
-                    neg_count+=1
-                else:
-                    neg_count = 0
-                if(neg_count>100):
-                    observation = env.reset()
-                    done=True
                 if done: 
-                    #if(SOLVED):
-                    #    print(cum_reward)                                   
-                    if(cum_reward>best):
-                        best_agent = agent
-                        best = cum_reward
                     observation = env.reset()
                     break
-            if(not SOLVED):
-                population.register_next(n,cum_reward)            
+            population.register_next(n,cum_reward)            
             all_reward += cum_reward 
-        viewbest = True
-        if(viewbest):
-            neg_count = 0
-            while(True):
-                action = best_agent.forward(observation.flatten()) # your agent here (this takes random actions)
-                observation, reward, done, _ = env.step(action)
-                if(reward<0):
-                    neg_count+=1
-                else:
-                    neg_count = 0
-                if(neg_count>100):
-                    observation = env.reset()
-                    break
-                env.render()
-                if done: 
-                    observation = env.reset()
-                    break
-        with open("bipedal.txt","a") as file:
-            file.write(str(best)+"\n")
+        with open("cartpole.txt","a") as file:
+            file.write(str(all_reward/POPSIZE)+"\n")
         print("AVG: ",all_reward/POPSIZE)
-        print("BEST: ",best)
-        if(SOLVED or all_reward/POPSIZE==500):
-            SOLVED = True
-        else:
-            population.evolve_next_population()
+        population.evolve_next_population()
     env.close()
 

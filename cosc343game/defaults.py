@@ -6,10 +6,10 @@ game_params = {
    "player1": "randomPlayer",
 
    # File implementing the agent playing as player 2 (exclude .py extension)
-   "player2": "VanillaGA",
+   "player2": "NEATAgent",
 
    # Game for which to show visualisations
-    "show_games": [i for i in range(300,500)],
+    "show_games": [i for i in range(40,500)],
 
    # Games for which to save visualisations (for later re-viewing)
     "save_games": [1, 500],
